@@ -55,6 +55,7 @@ return {
         "xml",
         "yaml",
       },
+      ensure_installed_sync = false,
     },
     ---@param opts lazyvim.TSConfig
     config = function(_, opts)
@@ -92,9 +93,14 @@ return {
       end, opts.ensure_installed or {})
       if #install > 0 then
         LazyVim.treesitter.build(function()
-          TS.install(install, { summary = true }):await(function()
+          if opts.ensure_installed_sync then
+            TS.install(install, { summary = true }):wait()
             LazyVim.treesitter.get_installed(true) -- refresh the installed langs
-          end)
+          else
+            TS.install(install, { summary = true }):await(function()
+              LazyVim.treesitter.get_installed(true) -- refresh the installed langs
+            end)
+          end
         end)
       end
 
